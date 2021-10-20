@@ -19,7 +19,6 @@ class UserClass {
                             "${this.password}", 
                             "${this.avatar}",
                             ${this.privilege})`;
-                            console.log(query);
         return new Promise((resolve, reject) =>{
             mysqlConnection.query(query, (err, result) => {
                 if (err){
