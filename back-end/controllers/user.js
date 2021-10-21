@@ -15,7 +15,7 @@ exports.signup = (req, res, next) => {
                         req.file ? 
                             `${req.protocol}://${req.get('host')}/images/${req.file.filename}` : 
                             `${req.protocol}://${req.get('host')}/images/avatar_default.png`,
-                        req.body.privilege
+                        false
                     );
                     user.save()
                         .then(() => res.status(201).json({ message: 'Utilisateur créé !' }))

@@ -44,8 +44,8 @@ find = () => {
     });
 }
 
-findOne = (id) => {
-    var query = `SELECT * FROM User WHERE id = ${id}`;
+findOne = (email) => {
+    var query = `SELECT * FROM User WHERE email = "${email}"`;
     return new Promise((resolve, reject) =>{
         mysqlConnection.query(query, (err, result) => {
             if (err) {

@@ -1,4 +1,6 @@
 import { createApp } from 'vue'
-import App from './App.vue'
+import AuthWrapper from "./components/AuthWrapper.vue";
+//import App from './App.vue'
+import router from './router'
 
-createApp(App).mount('#app')
+createApp(AuthWrapper).use(router).mount('#app')
