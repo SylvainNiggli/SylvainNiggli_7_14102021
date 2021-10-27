@@ -4,7 +4,7 @@ const fs = require('fs');
 
 exports.getAllPostByForum =(req,res,next) => {
     Post.findByForum(req.params.forum)
-        .then(post => res.status(200).json(post))
+        .then(posts => res.status(200).json(posts))
         .catch(error => res.status(404).json({ error }));
 }
 
@@ -16,7 +16,7 @@ exports.getOnePostById = (req,res,next) => {
 
 exports.getAllCommentsByPostId = (req,res,next) => {
     Post.findByPostId(req.params.id)
-        .then(post => res.status(200).json(post))
+        .then((comments) => res.status(200).json(comments))
         .catch(error => res.status(404).json({ error }));
 }
 
@@ -35,7 +35,8 @@ exports.setOnePost = (req, res, next) => {
             now.getMinutes().toString().padStart(2, '0')}:${
             now.getSeconds().toString().padStart(2, '0')}`,
             postObject.comment ? postObject.comment : null,
-            postObject.mediaUrl ? postObject.mediaUrl : null ,
+            req.file ? 
+                `${req.protocol}://${req.get('host')}/images/${req.file.filename}` : null ,
             null  
     );
     post.save()
@@ -57,7 +58,7 @@ exports.setOneComment = (req,res,next) => {
             now.getMinutes().toString().padStart(2, '0')}:${
             now.getSeconds().toString().padStart(2, '0')}`,
             commentObject.comment ? commentObject.comment : null,
-            req.file.filename ? 
+            req.file ? 
                 `${req.protocol}://${req.get('host')}/images/${req.file.filename}` : null ,
             req.params.id  
     );
@@ -80,9 +81,8 @@ exports.updateOnePostOrComment = (req,res,next) => {
         comment : post.comment,
         mediaUrl : req.file ? 
             `${req.protocol}://${req.get('host')}/images/${req.file.filename}` : 
-            post.mediaUrl
+            post.mediaUrl ? post.mediaUrl : null
     }
-    console.log(postToSend);
     Post.updateOne(req.params.id , postToSend)
          .then(() => res.status(200).json({ message: 'Post modified !'}))
          .catch(error => res.status(400).json({ error })); 
@@ -92,9 +92,9 @@ exports.deletePost = (req, res, next) => {
     Post.findOne(req.params.id)
         .then(post => {
             const filename = post.media_url.split('/images/')[1];
-            fs.unlink(`images/${filename}`, () => {
+            fs.unlink(`public/images/${filename}`, () => {
                 Post.deleteOne(req.params.id)
-                .then(() => res.status(200).json({message: "Post delated !"}))
+                .then(() => res.status(200).json({message: "Post deleted !"}))
                 .catch(error => res.status(400).json({ error }));
             })
         })

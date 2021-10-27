@@ -2,6 +2,7 @@ const User = require('../models/User');
 const { UserClass } = require('../models/User');
 const bcrypt = require('bcrypt');
 const jsonwebtoken = require('jsonwebtoken');
+const fs = require('fs');
 
 exports.signup = (req, res, next) => {
     bcrypt.genSalt(10)
@@ -9,7 +10,7 @@ exports.signup = (req, res, next) => {
             bcrypt.hash(req.body.password, salt)
                 .then(hash => {
                     const user = new UserClass(
-                        req.body.pseudo,
+                        req.body.username,
                         req.body.email,
                         hash,
                         req.file ? 
@@ -27,11 +28,8 @@ exports.signup = (req, res, next) => {
 };
 
 exports.login = (req, res, next) => {
-    User.findOne(req.body.email)
+    User.findOne(req.body.username)
         .then(user => {
-            if (!user) {
-            return res.status(401).json({ error: 'Utilisateur non trouvé !' });
-            }
             bcrypt.compare(req.body.password, user.password)
             .then(valid => {
                 if (!valid) {
@@ -43,12 +41,16 @@ exports.login = (req, res, next) => {
                         { userId: user.id},
                         'RANDOM_TOKEN_SECRET',
                         { expiresIn : '24h'}
-                    )
+                    ),
+                    username: user.username,
+                    email: user.email,
+                    avatar: user.avatar,
+                    privilege: user.privilege
                 });
             })
             .catch(error => res.status(500).json({ error }));
         })
-        .catch(error => res.status(500).json({ error }));
+        .catch(error => res.status(404).json({ error }));
 };
 
 exports.getAllUsers = (req,res,next) => {
@@ -62,12 +64,32 @@ exports.modifyUser = (req,res,next) => {
         `${req.protocol}://${req.get('host')}/images/${req.file.filename}` : 
         req.body.avatar;
     User.updateOne(req.params.id , {email:req.body.email,avatar : avatarUrl})
-         .then(() => res.status(200).json({ message: 'Objet modifié !'}))
+         .then(() => {
+             if(req.file){
+                const filename = req.body.avatar.split('/images/')[1];
+                if(filename !== "avatar_default.png"){
+                    fs.unlink(`public/images/${filename}`, () => {
+                        
+                    })
+                } 
+             }
+            res.status(200).json({ email: req.body.email, avatar: avatarUrl});
+         })            
          .catch(error => res.status(400).json({ error })); 
 }
 
 exports.deleteUser = (req,res,next) => {
-    User.deleteOne(req.params.id )
-         .then(() => res.status(200).json({ message: 'Objet supprimé !'}))
-         .catch(error => res.status(400).json({ error }));  
+    User.findOneById(req.params.id)
+        .then((user) => {
+            const filename = user.avatar.split('/images/')[1];
+                if(filename !== "avatar_default.png"){
+                    fs.unlink(`public/images/${filename}`, () => {
+                        
+                    })
+                } 
+            User.deleteOne(user.id)
+                .then(() => res.status(200).json({message: "Post deleted !"}))
+                .catch(error => res.status(400).json({ error }));   
+        })
+        .catch(error => res.status(400).json({ error }));  
 };

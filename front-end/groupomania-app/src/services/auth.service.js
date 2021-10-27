@@ -1,23 +1,22 @@
 
-const API_URL = 'http://localhost:3000/api/auth';
+import axios from 'axios';
+import AuthHeader from './auth-header.js'
+
+const API_URL = 'http://localhost:3000/api/auth/';
 
 class AuthService {
   login(user) {
-    const options = {
-      method: "POST",
-      body: JSON.stringify({email :user.email, password: user.password}),
-      headers: {
-      'Accept': 'application/json', 
-      'Content-Type': 'application/json'
-      }     
-    };
-    fetch(API_URL + `/login`, options)
-      .then((res) => {
-        if(res.ok){
-          return res.json();
-        }
+    return axios
+      .post(API_URL + 'login', {
+        username: user.username,
+        password: user.password
       })
-      .then((value) => localStorage.setItem("user", JSON.stringify(value)))
+      .then(response => {
+        if(response.data.token){
+          localStorage.setItem('user',JSON.stringify(response.data));
+        }
+        return response.data;
+      });
   }
 
   logout() {
@@ -25,43 +24,39 @@ class AuthService {
   }
 
   register(user) {
-    const options = {
-      method: "POST",
-      body: JSON.stringify({pseudo : user.username, email: user.email, password: user.password}),
-      headers: {
-      'Accept': 'application/json', 
-      'Content-Type': 'application/json'
-      }     
-    };
-    fetch(API_URL + `/signup`, options)
-      .then((res) => {
-        if(res.ok){
-          return res.json();
-        }
-      })
-      .then((value) => localStorage.setItem("user", JSON.stringify(value)))
-  }
-}
- /*function login(email, password) {
-    var localUser = users.find(user => user.email === email && user.password === password) || null;
-    const options = {
-      method: "POST",
-      body: JSON.stringify({email,password}),
-      headers: {
-      'Accept': 'application/json', 
-      'Content-Type': 'application/json'
-      }     
-    };
-    console.log(JSON.stringify({email,password}));
-    fetch(API_URL + `/login`, options)
-      .then((res) => {
-        if(res.ok){
-          return res.json();
-        }
-      })
-      .then((value) => console.log(value))
-    return localUser;
+    return axios.post(API_URL + 'signup', {
+      username: user.username,
+      email: user.email,
+      password: user.password
+    })
   }
   
-  export { login };*/
-  export default new AuthService();
+  modifyUser(user){
+    var formData = new FormData();
+      if(user.file){
+        formData.append("image", user.file, 'avatar')
+      }
+      formData.append("email",user.email);
+      formData.append("avatar", user.avatar);
+      return axios.put(API_URL + `users/${ user.userId }`, formData, {
+        headers: AuthHeader.authHeaderFile()
+      })
+      .then(response => {
+        let user = JSON.parse(localStorage.getItem('user'));
+        user.email = response.data.email;
+        user.avatar = response.data.avatar;
+        localStorage.removeItem('user');
+        localStorage.setItem('user', JSON.stringify(user));
+        return response.data;
+      })
+  }
+
+  delete(id) {
+    return axios.delete(API_URL + `users/${ id }`,{ headers: AuthHeader.authHeader() })
+    .then(response => {
+      return response.data;
+    });
+  }
+}
+
+export default new AuthService() ;

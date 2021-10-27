@@ -5,18 +5,18 @@ const auth = require('../middleware/auth');
 const multer = require('../middleware/multer-config');
 
 /*-- POST -- */
-router.post('/', multer, postCtrl.setOnePost);
-router.post('/:id/comments', multer, postCtrl.setOneComment);
+router.post('/',auth, multer, postCtrl.setOnePost);
+router.post('/:id/comments',auth, multer, postCtrl.setOneComment);
 
 /*-- GET -- */
-router.get('/forum/:forum', postCtrl.getAllPostByForum);
-router.get('/:id/comments/', postCtrl.getAllCommentsByPostId);
-router.get('/:id', postCtrl.getOnePostById);
+router.get('/forum/:forum',auth, postCtrl.getAllPostByForum);
+router.get('/:id/comments/',auth, postCtrl.getAllCommentsByPostId);
+router.get('/:id',auth, postCtrl.getOnePostById);
 
 /*-- PUT --*/
-router.put('/:id', multer, postCtrl.updateOnePostOrComment)
+router.put('/:id',auth, multer, postCtrl.updateOnePostOrComment)
 
 /*-- DELETE -- */
-router.delete('/:id', postCtrl.deletePost);
+router.delete('/:id',auth, postCtrl.deletePost);
 
 module.exports = router;

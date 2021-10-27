@@ -4,8 +4,8 @@ const mysqlConnection = require("../database");
 dotenv.config();
 
 class UserClass {
-    constructor(pseudo,email,password,avatar,privilege){
-        this.pseudo = pseudo;
+    constructor(username,email,password,avatar,privilege){
+        this.username = username;
         this.email = email;
         this.password = password;
         this.avatar = avatar;
@@ -13,8 +13,8 @@ class UserClass {
     }
     save = () => {
         var query = `INSERT INTO 
-                    User (pseudo,email,password,avatar,privilege) 
-                    VALUES ("${this.pseudo}", 
+                    User (username,email,password,avatar,privilege) 
+                    VALUES ("${this.username}", 
                             "${this.email}", 
                             "${this.password}", 
                             "${this.avatar}",
@@ -38,20 +38,45 @@ find = () => {
             if (err) {
                 reject(err);
             } else{
-                resolve(JSON.parse(JSON.stringify(result)));
+                if(!result[0]){
+                    reject("Aucun utilisateur");
+                }else{
+                    resolve(JSON.parse(JSON.stringify(result)));
+                }  
             }            
         })  
     });
 }
 
-findOne = (email) => {
-    var query = `SELECT * FROM User WHERE email = "${email}"`;
+findOne = (username) => {
+    var query = `SELECT * FROM User WHERE username = "${ username }"`;
     return new Promise((resolve, reject) =>{
         mysqlConnection.query(query, (err, result) => {
             if (err) {
                 reject(err);
             } else{
-                resolve(JSON.parse(JSON.stringify(result[0])));
+                if(!result[0]){
+                    reject("Aucun utilisateur correspondant");
+                }else{
+                    resolve(JSON.parse(JSON.stringify(result[0])));
+                }  
+            }            
+        })  
+    });
+}
+
+findOneById = (id) => {
+    var query = `SELECT * FROM User WHERE id = "${ id }"`;
+    return new Promise((resolve, reject) =>{
+        mysqlConnection.query(query, (err, result) => {
+            if (err) {
+                reject(err);
+            } else{
+                if(!result[0]){
+                    reject("Aucun utilisateur correspondant");
+                }else{
+                    resolve(JSON.parse(JSON.stringify(result[0])));
+                }  
             }            
         })  
     });
@@ -74,7 +99,8 @@ updateOne = (id, user ) => {
 }
 
 deleteOne = (id) => {
-    var query = `DELETE FROM User WHERE id = ${id}`;
+    var query = `DELETE FROM User 
+                WHERE id = ${id}`;
     return new Promise((resolve, reject) =>{
         mysqlConnection.query(query, (err, result) => {
             if (err) {
@@ -86,7 +112,7 @@ deleteOne = (id) => {
     });
 }
 
-module.exports = { UserClass, find, findOne, updateOne, deleteOne };
+module.exports = { UserClass, find, findOne,findOneById, updateOne, deleteOne };
 
 
 

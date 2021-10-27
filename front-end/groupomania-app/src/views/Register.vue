@@ -1,12 +1,14 @@
 <template>
-    <div class="login">
-        <div class="login-title">
-            <h1>Connexion</h1>
-            <p>Connectez-vous avez vos identifiants</p>
+    <div class="register">
+        <div class="register-title">
+            <h1>Inscription</h1>
+            <p>Veuillez renseignez les champs ci-dessous</p>
         </div>
-        <form class="login-form"  @submit.prevent="handleLogin">
+        <form class="register-form"  @submit.prevent="handleRegister">
             <div v-if="message" class="error">{{ message }}</div>
             <input name="username" type="text" placeholder="Nom d'utilisateur" v-model="user.username"/>
+            <span></span>
+            <input name="email" type="email" placeholder="Adresse e-mail" v-model="user.email"/>
             <span></span>
             <input type="password" placeholder="Mot de passe" v-model="user.password" />
             <span></span>
@@ -14,7 +16,6 @@
                 <span>CONTINUER</span>
             </button>
         </form>    
-            <p>Vous n'avez pas encore de compte, <a href="#/register">inscrivez-vous</a></p> 
     </div>
 </template>
 
@@ -23,11 +24,11 @@
 import User from '../models/user';
 
 export default {
-    name: 'Login',
+    name: 'Register',
     data(){
         
         return {
-            user: new User('',''),
+            user: new User('','',''),
             loading: false,
             message: '',
         }
@@ -43,27 +44,35 @@ export default {
         }
     },
     methods: {
-        goToRegister(){
-            this.$router.push('register')
-        },
         validate() {
             return Promise.resolve(true);   
         },
-        handleLogin() {
+        handleRegister() {
             this.loading =true;
             this.validate().then(isValid => {
                 if(!isValid){
                     this.loading = false;
                     return;
                 }
-                if(this.user.username && this.user.password) {
-                    this.$store.dispatch('auth/login', this.user).then(
+                if(this.user.username && this.user.email && this.user.password) {
+                    this.$store.dispatch('auth/register', this.user).then(
                         () => {
-                            this.$router.push('Home');
+                            this.$store.dispatch('auth/login', this.user).then(
+                                () => {
+                                    this.$router.push('/');
+                                },
+                                error => {
+                                    this.loading = false;
+                                    this.message = (error.reponse && error.response.data) ||
+                                                    error.message ||
+                                                    error.toString();
+                                }
+                            );
+                            this.$router.push('/');
                         },
                         error => {
                             this.loading = false;
-                            this.message = (error.response && error.response.data.error) ||
+                            this.message = (error.reponse && error.response.data) ||
                                 error.message ||
                                 error.toString();
                         }
@@ -78,9 +87,8 @@ export default {
 };
 </script>
 
-<style lang="scss">
-       
-    .login{
+<style lang="scss">    
+    .register{
         height: 50vh;
         display: flex;
         flex-direction: column;
@@ -96,7 +104,6 @@ export default {
             }
             p{
                 font-size: 1.5em;
-                margin-top: 30px;
             }
         }
 
@@ -121,13 +128,11 @@ export default {
                 width: 30%;
                 height: 50px;
                 padding: 10px;
-                background-color: lightseagreen;
                 color: white;
                 border: none;
                 border-radius: 5px;
                 cursor: pointer;
             }
-
         }            
     }       
 </style>

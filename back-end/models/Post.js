@@ -22,10 +22,10 @@ class PostClass {
                         comment, 
                         media_url)
                     VALUES (${this.userId}, 
-                            ${this.forum}, 
-                            ${this.dateCreation}, 
-                            ${this.comment},
-                            ${this.mediaUrl})`;
+                            "${this.forum}", 
+                            "${this.dateCreation}", 
+                            "${this.comment}",
+                            "${this.mediaUrl}")`;
         } else{
             query = `INSERT INTO 
                     Post (user_id,
@@ -36,7 +36,7 @@ class PostClass {
                         id_post_parent)
                     VALUES (${this.userId}, 
                             "${this.forum}", 
-                            ${this.dateCreation}, 
+                            "${this.dateCreation}", 
                             "${this.comment}",
                             "${this.mediaUrl}",
                             ${this.postParentId})`;
@@ -68,7 +68,8 @@ find = () => {
 }
 
 findByForum = (forum) => {
-    var query = `SELECT * FROM Post 
+    var query = `SELECT post.id as id,user_id,forum,date_creation,date_modification,comment,media_url,id_post_parent,username,avatar FROM Post 
+                INNER JOIN User ON Post.user_id = User.id
                 WHERE forum = "${forum}"
                 AND id_post_parent IS NULL
                 ORDER BY date_creation DESC`;
@@ -84,9 +85,10 @@ findByForum = (forum) => {
 }
 
 findByPostId = (id) => {
-    var query = `SELECT * FROM Post 
+    var query = `SELECT post.id as id,user_id,forum,date_creation,date_modification,comment,media_url,id_post_parent,username,avatar FROM Post 
+    INNER JOIN User ON Post.user_id = User.id
                 WHERE id_post_parent = ${id}
-                ORDER BY date_creation DESC`;
+                ORDER BY date_creation ASC`;
     return new Promise((resolve, reject) =>{
         mysqlConnection.query(query, (err, result) => {
             if (err) {
@@ -113,19 +115,19 @@ findOne = (id) => {
 
 updateOne = (id, post) => {
     var query = `UPDATE Post 
-                SET date_modification = ${post.dateModification},
-                    comment = "${post.comment}",
-                    media_url = "${post.mediaUrl}"
-                WHERE id = ${id}`;
-return new Promise((resolve, reject) =>{
-mysqlConnection.query(query, (err, result) => {
-if (err) {
-    reject(err);
-} else{
-    resolve(JSON.parse(JSON.stringify(result)));
-}            
-})  
-});
+                SET date_modification = "${post.dateModification}",
+                    comment = "${post.comment}"` 
+                    + (post.mediaUrl ? `,media_url = "${post.mediaUrl}"` : ``)
+                    + ` WHERE id = ${id}`;
+    return new Promise((resolve, reject) =>{
+        mysqlConnection.query(query, (err, result) => {
+            if (err) {
+                reject(err);
+            } else{
+                resolve(JSON.parse(JSON.stringify(result)));
+            }            
+        })  
+    });
 }
 
 deleteOne = (id) => {
