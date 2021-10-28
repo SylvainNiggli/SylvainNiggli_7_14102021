@@ -39,7 +39,7 @@ find = () => {
                 reject(err);
             } else{
                 if(!result[0]){
-                    reject("Aucun utilisateur");
+                    reject("Any user corresponding");
                 }else{
                     resolve(JSON.parse(JSON.stringify(result)));
                 }  
@@ -56,7 +56,7 @@ findOne = (username) => {
                 reject(err);
             } else{
                 if(!result[0]){
-                    reject("Aucun utilisateur correspondant");
+                    reject("Any user corresponding");
                 }else{
                     resolve(JSON.parse(JSON.stringify(result[0])));
                 }  
@@ -73,7 +73,7 @@ findOneById = (id) => {
                 reject(err);
             } else{
                 if(!result[0]){
-                    reject("Aucun utilisateur correspondant");
+                    reject("Any user corresponding");
                 }else{
                     resolve(JSON.parse(JSON.stringify(result[0])));
                 }  

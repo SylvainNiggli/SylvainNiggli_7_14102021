@@ -45,7 +45,6 @@ export const auth = {
                     return Promise.resolve(response);
                 },
                 error => {
-                    commit('modifyFailure');
                     return Promise.reject(error);
                 }
             )
@@ -57,7 +56,6 @@ export const auth = {
                     return Promise.resolve(response);
                 },
                 error => {
-                    //commit('deleteFailure');
                     return Promise.reject(error);
                 }
             )
@@ -75,12 +73,6 @@ export const auth = {
         logout(state) {
             state.status.loggedIn = false;
             state.user = null;
-        },
-        registerSuccess(state) {
-            state.status.loggedIn = false;
-        },
-        registerFailure(state) {
-            state.status.loggedIn = false;
         },
         deleteSuccess(state) {
             state.user = null;

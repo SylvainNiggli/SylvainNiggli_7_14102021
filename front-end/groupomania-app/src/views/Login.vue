@@ -4,13 +4,13 @@
             <h1>Connexion</h1>
             <p>Connectez-vous avez vos identifiants</p>
         </div>
-        <form class="login-form"  @submit.prevent="handleLogin">
+        <form class="login-form"  @submit.prevent="handleLogin" novalidate>
             <div v-if="message" class="error">{{ message }}</div>
             <input name="username" type="text" placeholder="Nom d'utilisateur" v-model="user.username"/>
             <span></span>
             <input type="password" placeholder="Mot de passe" v-model="user.password" />
             <span></span>
-            <button class="bg-primary" type="submit" :disabled="loading">
+            <button class="bg-primary" type="submit">
                 <span>CONTINUER</span>
             </button>
         </form>    
@@ -28,7 +28,6 @@ export default {
         
         return {
             user: new User('',''),
-            loading: false,
             message: '',
         }
     },
@@ -50,10 +49,8 @@ export default {
             return Promise.resolve(true);   
         },
         handleLogin() {
-            this.loading =true;
             this.validate().then(isValid => {
                 if(!isValid){
-                    this.loading = false;
                     return;
                 }
                 if(this.user.username && this.user.password) {
@@ -62,7 +59,6 @@ export default {
                             this.$router.push('Home');
                         },
                         error => {
-                            this.loading = false;
                             this.message = (error.response && error.response.data.error) ||
                                 error.message ||
                                 error.toString();

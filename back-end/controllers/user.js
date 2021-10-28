@@ -5,13 +5,38 @@ const jsonwebtoken = require('jsonwebtoken');
 const fs = require('fs');
 
 exports.signup = (req, res, next) => {
+    const profile = req.body;
+    let rgxUsername= /^([a-zA-Z.-_]){3,25}$/;
+    let rgxEmail = /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+    let rgxPassword = /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])[0-9a-zA-Z]{8,}$/;
+    if(!profile){
+        return res.status(403).json({ error: "User object is null" });
+    }
+    if(!profile.username){
+        return res.status(403).json({ error: "Username must be not null" });
+    }
+    if(!profile.email){
+        return res.status(403).json({ error: "Email must be not null" });
+    }
+    if(!profile.password){
+        return res.status(403).json({ error: "Password must be not null" });
+    }
+    if(!rgxUsername.test(profile.username)){
+        return res.status(406).json({ error: "Username is not valid" });
+    }
+    if(!rgxEmail.test(profile.email)){
+        return res.status(406).json({ error: "Email is not valid" });
+    }
+    if(!rgxPassword.test(profile.password)){
+        return res.status(406).json({ error: "Password is not valid" });
+    }
     bcrypt.genSalt(10)
         .then(salt => {
-            bcrypt.hash(req.body.password, salt)
+            bcrypt.hash(profile.password, salt)
                 .then(hash => {
                     const user = new UserClass(
-                        req.body.username,
-                        req.body.email,
+                        profile.username,
+                        profile.email,
                         hash,
                         req.file ? 
                             `${req.protocol}://${req.get('host')}/images/${req.file.filename}` : 
@@ -19,7 +44,7 @@ exports.signup = (req, res, next) => {
                         false
                     );
                     user.save()
-                        .then(() => res.status(201).json({ message: 'Utilisateur créé !' }))
+                        .then(() => res.status(201).json({ message: 'User created' }))
                         .catch(error => res.status(400).json({ error }));
                 })
                 .catch(error => res.status(500).json({ error }));
@@ -28,12 +53,22 @@ exports.signup = (req, res, next) => {
 };
 
 exports.login = (req, res, next) => {
-    User.findOne(req.body.username)
+    const profile = req.body;
+    let rgxUsername= /^([a-zA-Z.-_]){3,25}$/;
+    let rgxPassword = /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])[0-9a-zA-Z]{8,}$/;
+    if(!profile){
+        return res.status(403).json({ error: "User object is null" });
+    }
+    if(!profile.username || !rgxUsername.test(profile.username ||
+        !profile.password || !rgxPassword.test(profile.password))){
+        return res.status(406).json({ error: "Bad username or password" });
+    }
+    User.findOne(profile.username)
         .then(user => {
-            bcrypt.compare(req.body.password, user.password)
+            bcrypt.compare(profile.password, user.password)
             .then(valid => {
                 if (!valid) {
-                    return res.status(401).json({ error: 'Mot de passe incorrect !' });
+                    return res.status(406).json({ error: "Bad username or password" });
                 }
                 res.status(200).json({
                     userId: user.id,
@@ -60,6 +95,19 @@ exports.getAllUsers = (req,res,next) => {
 };
 
 exports.modifyUser = (req,res,next) => {
+    let rgxEmail = /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+    if(isNaN(req.params.id)){
+        return res.status(406).json({ error: "Parameter 'id' must be a number" });
+    }
+    if(!req.body.avatar){
+        return res.status(403).json({ error: "Email must be not null" });
+    }
+    if(!req.body.email){
+        return res.status(403).json({ error: "Avatar must be not null" });
+    }
+    if(!rgxEmail.test(req.body.email)){
+        return res.status(406).json({ error: "Email is not valid" });
+    }
     const avatarUrl = req.file ? 
         `${req.protocol}://${req.get('host')}/images/${req.file.filename}` : 
         req.body.avatar;
@@ -79,6 +127,9 @@ exports.modifyUser = (req,res,next) => {
 }
 
 exports.deleteUser = (req,res,next) => {
+    if(isNaN(req.params.id)){
+        return res.status(406).json({ error: "Parameter 'id' must be a number" });
+    }
     User.findOneById(req.params.id)
         .then((user) => {
             const filename = user.avatar.split('/images/')[1];

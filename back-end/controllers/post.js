@@ -3,18 +3,30 @@ const { PostClass } = require('../models/Post');
 const fs = require('fs');
 
 exports.getAllPostByForum =(req,res,next) => {
+    if(!req.params.forum){
+        return res.status(403).json({ error: "Parameter 'forum' must be not null"});
+    }
+    if(req.params.forum !== 'multimedias' && req.params.forum !== 'articles'){
+        return res.status(406).json({ error: "Invalid type of forum"});
+    }
     Post.findByForum(req.params.forum)
         .then(posts => res.status(200).json(posts))
         .catch(error => res.status(404).json({ error }));
 }
 
 exports.getOnePostById = (req,res,next) => {
+    if(isNaN(req.params.id)){
+        return res.status(406).json({ error: "Parameter 'id' must be a number" });
+    }
     Post.findOne(req.params.id)
         .then(post => res.status(200).json(post))
         .catch(error => res.status(404).json({ error }));
 }
 
 exports.getAllCommentsByPostId = (req,res,next) => {
+    if(isNaN(req.params.id)){
+        return res.status(406).json({ error: "Parameter 'id' must be a number" });
+    }
     Post.findByPostId(req.params.id)
         .then((comments) => res.status(200).json(comments))
         .catch(error => res.status(404).json({ error }));
@@ -23,7 +35,22 @@ exports.getAllCommentsByPostId = (req,res,next) => {
 
 exports.setOnePost = (req, res, next) => {
     const postObject = req.body.post;
-    var now = new Date();
+    if(!postObject){
+        return res.status(403).json({ error: "Post object is null" });
+    } 
+    if(!postObject.comment){
+        return res.status(403).json({ error: "Post comment must be not null" });
+    }
+    if(isNaN(postObject.userId)){
+        return res.status(406).json({ error: "UserId must be a number" });
+    }
+    if(!postObject.forum){
+        return res.status(403).json({ error: "Forum must be not null"});
+    }
+    if(postObject.forum !== 'multimedias' && postObject.forum !== 'articles'){
+        return res.status(406).json({ error: "Invalid type of forum"});
+    }
+    const now = new Date();
     const post = new PostClass(
         postObject.userId,
         postObject.forum,
@@ -46,6 +73,24 @@ exports.setOnePost = (req, res, next) => {
 
 exports.setOneComment = (req,res,next) => {
     const commentObject = req.body.comment;
+    if(!commentObject){
+        return res.status(403).json({ error: "Post object is null" });
+    } 
+    if(!commentObject.comment){
+        return res.status(403).json({ error: "Post comment must be not null" });
+    }
+    if(isNaN(commentObject.userId)){
+        return res.status(406).json({ error: "UserId must be a number" });
+    }
+    if(!commentObject.forum){
+        return res.status(403).json({ error: "Forum must be not null"});
+    }
+    if(commentObject.forum !== 'multimedias' && commentObject.forum !== 'articles'){
+        return res.status(406).json({ error: "Invalid type of forum"});
+    }
+    if(isNaN(req.params.id)){
+        return res.status(403).json({ error: "Parameter 'id' must be a number" });
+    }
     var now = new Date();
     const comment = new PostClass(
         commentObject.userId,
@@ -69,6 +114,24 @@ exports.setOneComment = (req,res,next) => {
 
 exports.updateOnePostOrComment = (req,res,next) => {
     const post = req.body.post;
+    if(!post){
+        return res.status(403).json({ error: "Post object is null" });
+    } 
+    if(!post.comment){
+        return res.status(403).json({ error: "Post comment must be not null" });
+    }
+    if(isNaN(post.userId)){
+        return res.status(406).json({ error: "UserId must be a number" });
+    }
+    if(!post.forum){
+        return res.status(403).json({ error: "Forum must be not null"});
+    }
+    if(post.forum !== 'multimedias' && post.forum !== 'articles'){
+        return res.status(406).json({ error: "Invalid type of forum"});
+    }
+    if(isNaN(req.params.id)){
+        return res.status(406).json({ error: "Parameter 'id' must be a number" });
+    }
     const now = new Date();
     const postToSend = {
         dateModification : `${
@@ -89,6 +152,9 @@ exports.updateOnePostOrComment = (req,res,next) => {
 }
 
 exports.deletePost = (req, res, next) => {
+    if(isNaN(req.params.id)){
+        return res.status(406).json({ error: "Parameter 'id' must be a number" });
+    }
     Post.findOne(req.params.id)
         .then(post => {
             const filename = post.media_url.split('/images/')[1];
