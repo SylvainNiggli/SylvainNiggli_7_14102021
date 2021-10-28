@@ -7,9 +7,7 @@
         <form class="login-form"  @submit.prevent="handleLogin" novalidate>
             <div v-if="message" class="error">{{ message }}</div>
             <input name="username" type="text" placeholder="Nom d'utilisateur" v-model="user.username"/>
-            <span></span>
             <input type="password" placeholder="Mot de passe" v-model="user.password" />
-            <span></span>
             <button class="bg-primary" type="submit">
                 <span>CONTINUER</span>
             </button>
@@ -45,23 +43,33 @@ export default {
         goToRegister(){
             this.$router.push('register')
         },
+        validUsername(){
+            let rgxUsername= /^([a-zA-Z.-_]){3,25}$/;
+            return rgxUsername.test(this.user.username);
+        },
+        validPassword(){
+            let rgxPassword = /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])[0-9a-zA-Z]{8,}$/;
+            return rgxPassword.test(this.user.password);
+        },
         validate() {
-            return Promise.resolve(true);   
+            return Promise.resolve(this.validUsername() && this.validPassword());
         },
         handleLogin() {
             this.validate().then(isValid => {
                 if(!isValid){
+                    this.message = 'Mauvais utilisateur ou mot de passe';
                     return;
                 }
+                this.message = '';
                 if(this.user.username && this.user.password) {
                     this.$store.dispatch('auth/login', this.user).then(
                         () => {
                             this.$router.push('Home');
                         },
                         error => {
-                            this.message = (error.response && error.response.data.error) ||
-                                error.message ||
-                                error.toString();
+                            this.message = error.response.status === 404 ? 
+                                            'Aucun utilisateur trouvé' : 
+                                            error.response.data.error;
                         }
                     );
                 }

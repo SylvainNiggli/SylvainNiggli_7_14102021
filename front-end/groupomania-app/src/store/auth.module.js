@@ -25,14 +25,14 @@ export const auth = {
             AuthService.logout();
             commit('logout');
         },
-        register( { commit }, user) {
+        register(user) {
             return AuthService.register(user).then(
                 response => {
-                    commit('registerSuccess');
+                    //commit('registerSuccess');
                     return Promise.resolve(response);
                 },
                 error => {
-                    commit('registerFailure');
+                    //commit('registerFailure');
                     return Promise.reject(error);
                 }
             );
