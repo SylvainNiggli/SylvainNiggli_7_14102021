@@ -14,7 +14,7 @@
                 <span>CONTINUER</span>
             </button>
         </form>    
-            <p>Vous n'avez pas encore de compte, <a href="#/register">inscrivez-vous</a></p> 
+            <p class="mt-3">Vous n'avez pas encore de compte, <a href="#/register">inscrivez-vous</a></p> 
     </div>
 </template>
 

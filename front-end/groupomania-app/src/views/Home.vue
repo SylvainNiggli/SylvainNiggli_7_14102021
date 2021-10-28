@@ -1,7 +1,7 @@
 <template>
   <div class="home">
-    <img alt="Vue logo" src="../assets/logo.png">
-    <HelloWorld msg="Welcome to Your Vue.js App"/>
+    <img class="mt-5 mb-5" alt="Vue logo" width="500" src="../assets/logo_groupomania.png">
+    <HelloWorld msg="Bienvenu sur le réseau social interne de Groupomania"/>
   </div>
 </template>
 

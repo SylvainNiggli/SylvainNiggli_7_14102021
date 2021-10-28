@@ -231,6 +231,7 @@ export default {
             .then(
                 () => {
                   this.article = null;
+                  this.file = '';
                   this.updatePosts();
                 },
                 error => {

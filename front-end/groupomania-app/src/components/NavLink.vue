@@ -25,7 +25,7 @@
               <router-link  to="/login" class="nav-link" >Login</router-link>  
             </li>
             <li v-if="loggedIn" class="nav-item dropdown">
-              <router-link to="#" class="nav-link dropdown-toggle" id="navbarProfile" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><img class="bg-info rounded-circle" height="30" v-bind:src="user.avatar"/></router-link>
+              <router-link to="#" class="nav-link dropdown-toggle" id="navbarProfile" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><img v-if="user" class="bg-info rounded-circle" height="30" v-bind:src="user.avatar"/></router-link>
               <div class="dropdown-menu bg-primary" aria-labelledby="navbarProfile">
                 <router-link to="/profile" class="dropdown-item text-white bg-primary">Profil</router-link>
                 <div class="dropdown-divider"></div>
