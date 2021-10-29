@@ -20,9 +20,10 @@
             <div class="card-body">
               <div class="tab-content" id="myTabContent">
                 <div class="tab-pane fade show active" id="posts" role="tabpanel" aria-labelledby="posts-tab">
-                  <div class="form-group">
+                  <div class="form-group d-flex flex-column">
                     <label class="sr-only" for="message">article</label>
                     <textarea class="form-control" id="message" v-model="this.article" rows="4" placeholder="Que voulez-vous partager ?"></textarea>
+                    <span class="error">{{messagePost}}</span>
                   </div>
                 </div>
                 <div class="tab-pane fade" id="images" role="tabpanel" aria-labelledby="images-tab">
@@ -72,9 +73,10 @@
                 </div>
               </div>
               <div class="card-body">
-                <div v-if="inModification === post.id">
+                <div v-if="inModification === post.id" class="d-flex flex-column">
                     <label class="sr-only" for="newArticle">article à modifier</label>
                     <textarea class="form-control" id="newArticle" v-model="this.newArticle" rows="4"></textarea>
+                    <span class="error">{{messageNewPost}}</span>
                     <div class="mt-2 d-flex justify-content-end">
                       <button class="btn btn-primary mr-1" @click="this.inModification = 0">Annuler</button>
                       <button class="btn btn-primary ml-1" @click="modifyPost(post)">Valider</button>
@@ -102,9 +104,10 @@
                   <Comment v-bind:postParentId="post.id"/>
                 </div>
               
-                <div v-if="this.inModification === 0">
+                <div v-if="this.inModification === 0" class="d-flex flex-column">
                   <label class="sr-only" v-bind:for="'comment-' + post.id">commentaire</label>
                   <textarea class="form-control" v-bind:id="'comment-' + post.id" v-model="this.response" rows="2" risize="none" placeholder="Ecrire un commentaire..."></textarea>
+                  <span class="error">{{messageComment}}</span>
                   <div class="mt-2 d-flex justify-content-end">
                     <button class="btn btn-primary ml-1" @click="setComment(post.id)">Valider</button>
                   </div>
@@ -125,7 +128,11 @@ import Comment from '../components/Comment.vue';
 export default {
     data(){
         return {
-            message: '',
+            message:'',
+            messagePost: '',
+            messageNewPost: '',
+            messageComment:'',
+            messageNewComment:'',
             article: '',
             newArticle: '',
             response: '',
@@ -171,9 +178,21 @@ export default {
             {
                 user: 'user'
             },   
-        ),
+        ),            
     },
     methods:{
+        validPost(){
+          this.messagePost = !this.article ? 'Ce champ est nécéssaire': '';
+          return this.article;
+        }, 
+        validNewPost(){
+          this.messageNewPost = !this.newArticle ? 'Ce champ est nécéssaire': '';
+          return this.newArticle;
+        }, 
+        validComment(){
+          this.messageComment = !this.response ? 'Ce champ est nécéssaire': '';
+          return this.response;
+        }, 
         handleFileUpload(){
           this.file = document.getElementById('customFile').files[0];
         },
@@ -201,20 +220,19 @@ export default {
                       .then(
                         () => {},
                         error => {
-                          this.message = (error.response && error.response.data.error) ||
-                                          error.message ||
-                                          error.toString();
+                          this.message = error.response.data.error;
                         } 
                       ) 
                   })
                 },
                 error => {
-                  this.message = (error.response && error.response.data.error) ||
-                                  error.message ||
-                                  error.toString();
+                  this.message = error.response.data.error;
                 });
         },
         setPost(){
+          if(!this.validPost()){
+            return
+          }
           if(this.file){
             let formData = new FormData();
             formData.append('post','salut');
@@ -235,14 +253,14 @@ export default {
                   this.updatePosts();
                 },
                 error => {
-                    this.message = (error.response && error.response.data.error) ||
-                                    error.message ||
-                                    error.toString();
-                    console.log(this.message);
+                    this.message = error.response.data.error;
                 } 
             )
         },
         setComment(postId){
+          if(!this.validComment()){
+            return
+          }
             this.$store.dispatch('posts/setComment', {
                 postId: postId,
                 userId: this.user.userId,
@@ -256,9 +274,7 @@ export default {
                   this.updatePosts(); 
                 },
                 error => {
-                    this.message = (error.response && error.response.data.error) ||
-                                    error.message ||
-                                    error.toString();
+                    this.message = error.response.data.error;
                 } 
             )
         },
@@ -273,14 +289,15 @@ export default {
                     this.updatePosts();
                 },
                 error => {
-                    this.message = (error.response && error.response.data.error) ||
-                                    error.message ||
-                                    error.toString();
+                    this.message = error.response.data.error;
                 } 
             )
         },
         modifyPost(post){ 
-            this.$store.dispatch('posts/modifyPost', {
+          if(!this.validNewPost()){
+            return
+          }
+          this.$store.dispatch('posts/modifyPost', {
                 id: post.id,
                 userId: post.user_id,
                 forum: 'articles',
@@ -293,9 +310,7 @@ export default {
                     this.updatePosts();
                 },
                 error => {
-                    this.message = (error.response && error.response.data.error) ||
-                                    error.message ||
-                                    error.toString();
+                    this.message = error.response.data.error;
                 } 
             )
         },
@@ -310,6 +325,17 @@ export default {
     textarea{
       resize: none;
     }
+
+    span{
+      width: 100%;
+      text-align: left;
+      margin-left: 5px;
+    }
+
+    .error{
+      color: tomato;
+    }
+
     .h7{
       font-size: 0.8rem;
     }

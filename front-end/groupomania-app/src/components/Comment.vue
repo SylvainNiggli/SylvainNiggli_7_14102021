@@ -9,12 +9,13 @@
                     <div class="card">
                         <div class="card-body p-1 rounded-lg">
                             <p class="card-text text-left h7 mb-0 text-primary">{{ comment.username }}</p>
-                            <p class="card-text text-left h6 mt-1">
+                            <p v-if="inModification === comment.id" class="card-text text-left h6 mt-1">
                                 {{comment.comment}}
                             </p>
                             <div v-if="inModification === comment.id">
                                 <label class="sr-only" for="newComment">commentaire à modifier</label>
-                                <textarea class="form-control" id="newComment" v-model="this.newComment" rows="2"></textarea>
+                                <textarea class="form-control" id="newComment" v-model="this.newComment" rows="2" @change="validNewComment()"></textarea>
+                                <span class="error">{{messageNewComment}}</span>
                                 <div class="mt-2 d-flex justify-content-end">
                                     <button class="btn btn-primary mr-1" @click="this.inModification = 0">Annuler</button>
                                     <button class="btn btn-primary ml-1" @click="modifyComment(comment)">Valider</button>
@@ -56,6 +57,8 @@ export default {
     },
     data(){
         return {
+            message:'',
+            messageNewComment:'',
             inModification: 0,
             inComment: 0,
             newComment: '',
@@ -76,18 +79,22 @@ export default {
         ),
     },
     methods: {
+        validNewComment(){
+          this.messageNewComment = !this.newComment ? 'Ce champ est nécéssaire': '';
+          return this.newComment;
+        },
+        validate() {
+            return Promise.resolve(this.validNewComment());
+        },
         getComments(){
             return this.posts.find(post => post.id === this.postParentId).comments;
         },
         updateComments(){
-          this.$store.dispatch('posts/getCommentsByPost',this.postParentId)
+            this.$store.dispatch('posts/getCommentsByPost',this.postParentId)
             .then(
                 () => {},
                 error => {
-                    console.log(error);
-                    this.message = (error.reponse && error.response.data) ||
-                                    error.message ||
-                                    error.toString();
+                    this.message = error.response.data.error;
                 } 
             ) 
         },
@@ -97,24 +104,29 @@ export default {
             this.newComment = comment.comment;
         },
         modifyComment(comment){ 
-            this.$store.dispatch('posts/modifyPost', {
-                id: comment.id,
-                userId: comment.user_id,
-                forum: 'articles',
-                article: this.newComment,  
+            this.validate().then(isValid => {
+                if(!isValid){
+                    return;
+                }
+                this.messageNewComment = '';
+                this.message = '';
+                this.$store.dispatch('posts/modifyPost', {
+                    id: comment.id,
+                    userId: comment.user_id,
+                    forum: 'articles',
+                    article: this.newComment,  
+                })
+                .then(
+                    () => {
+                        this.inModification = 0;
+                        this.newComment = null;
+                        this.updateComments();
+                    },
+                    error => {
+                        this.message = error.response.data.error;
+                    } 
+                )
             })
-            .then(
-                () => {
-                    this.inModification = 0;
-                    this.newComment = null;
-                    this.updateComments();
-                },
-                error => {
-                    this.message = (error.reponse && error.response.data) ||
-                                    error.message ||
-                                    error.toString();
-                } 
-            )
         },
         deletePost(id){
             this.inComment = 0;
@@ -126,9 +138,7 @@ export default {
                     this.updateComments();
                 },
                 error => {
-                    this.message = (error.reponse && error.response.data) ||
-                                    error.message ||
-                                    error.toString();
+                    this.message = error.response.data.error;
                 } 
             )
         },

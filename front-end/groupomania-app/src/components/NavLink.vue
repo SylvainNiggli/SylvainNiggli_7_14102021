@@ -9,8 +9,8 @@
         <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarContent">
           <span class="navbar-toggler-icon"></span>
         </button>
-        <div id="navbarContent" class="collapse navbar-collapse" style="justify-content:flex-end">
-          <ul class="navbar-nav d-flex align-items-center">
+        <div id="navbarContent" class="collapse navbar-collapse justify-content-lg-end" >
+          <ul class="navbar-nav d-flex flex-row align-items-center justify-content-between">
             <li class="nav-item active">
               <router-link to="/" class="nav-link" >Accueil</router-link>
             </li>

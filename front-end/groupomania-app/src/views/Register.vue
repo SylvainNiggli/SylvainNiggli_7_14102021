@@ -68,11 +68,11 @@ export default {
             return /^[0-9a-zA-Z]{8,}$/.test(this.user.password) ? true : false;
         },
     },
-        created() {
-            if(this.loggedIn) {
+    created() {
+        if(this.loggedIn) {
                 this.$router.push('Home');
-            }
-        },
+        }
+    },
     methods: {
         validUsername(){
             let rgxUsername= /^([a-zA-Z.-_]){3,25}$/;
