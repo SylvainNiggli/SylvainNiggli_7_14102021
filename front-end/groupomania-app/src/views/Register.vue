@@ -1,5 +1,5 @@
 <template>
-    <div class="register">
+    <div class="register mt-5">
         <div class="register-title mt-5">
             <h1>Inscription</h1>
             <p>Veuillez renseignez les champs ci-dessous</p>

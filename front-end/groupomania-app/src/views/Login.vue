@@ -1,5 +1,5 @@
 <template>
-    <div class="login">
+    <div class="login mt-5">
         <div class="login-title">
             <h1>Connexion</h1>
             <p>Connectez-vous avez vos identifiants</p>

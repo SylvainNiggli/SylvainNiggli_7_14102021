@@ -25,10 +25,10 @@ export const auth = {
             AuthService.logout();
             commit('logout');
         },
-        register(user) {
+        register({ commit } , user) {
             return AuthService.register(user).then(
                 response => {
-                    //commit('registerSuccess');
+                    commit('registerSuccess');
                     return Promise.resolve(response);
                 },
                 error => {
@@ -80,6 +80,9 @@ export const auth = {
         modifySuccess(state, user) {
             state.user.email = user.email;
             state.user.avatar = user.avatar;
+        },
+        registerSuccess(state){
+            state.status.register = 'ok';
         }
     }
 }
