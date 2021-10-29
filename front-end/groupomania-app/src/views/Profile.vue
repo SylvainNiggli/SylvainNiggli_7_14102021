@@ -135,6 +135,9 @@ export default {
             )
         },
         onDeleteClick(){
+            if(!confirm("Cette action supprimera votre compte")){
+                return
+            }
             this.$store.dispatch('auth/delete',this.user.userId)
                 .then(
                     () => this.$store.dispatch('auth/logout')

@@ -57,7 +57,7 @@ export default {
         handleLogin() {
             this.validate().then(isValid => {
                 if(!isValid){
-                    this.message = 'Mauvais utilisateur ou mot de passe';
+                    this.message = "Nom d'utilisateur ou mot de passe incorrect";
                     return;
                 }
                 this.message = '';
@@ -68,7 +68,7 @@ export default {
                         },
                         error => {
                             this.message = error.response.status === 404 ? 
-                                            'Aucun utilisateur trouvé' : 
+                                            "Nom d'utilisateur ou mot de passe incorrect" : 
                                             error.response.data.error;
                         }
                     );

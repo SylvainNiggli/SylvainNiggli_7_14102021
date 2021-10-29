@@ -279,6 +279,9 @@ export default {
             )
         },
         deletePost(id){
+            if(!confirm("Cette action supprimera ce poste")){
+                return
+            }
             this.inComment = 0;
             this.response = null;
             this.inModification = 0;

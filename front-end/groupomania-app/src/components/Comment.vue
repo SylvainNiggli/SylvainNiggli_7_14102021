@@ -9,7 +9,7 @@
                     <div class="card">
                         <div class="card-body p-1 rounded-lg">
                             <p class="card-text text-left h7 mb-0 text-primary">{{ comment.username }}</p>
-                            <p v-if="inModification === comment.id" class="card-text text-left h6 mt-1">
+                            <p v-if="inModification !== comment.id" class="card-text text-left h6 mt-1">
                                 {{comment.comment}}
                             </p>
                             <div v-if="inModification === comment.id">
@@ -129,6 +129,9 @@ export default {
             })
         },
         deletePost(id){
+            if(!confirm("Cette action supprimera ce commentaire")){
+                return
+            }
             this.inComment = 0;
             this.newComment = null;
             this.inModification = 0;
